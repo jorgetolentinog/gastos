@@ -1,10 +1,36 @@
 export default function AccountsPage() {
   // Datos de ejemplo - reemplazar con datos reales del estado
+  const localCurrency = 'USD'; // Moneda local seleccionada
+  
+  // Tasas de cambio (desde cada moneda a USD como base)
+  const exchangeRates = {
+    USD: 1,
+    EUR: 1.10,
+    ARS: 0.001
+  };
+
   const portfolioSummary = [
     { currency: 'USD', total: 45250.50, change: 1250.30, changePercent: 2.85 },
     { currency: 'EUR', total: 32100.00, change: -450.00, changePercent: -1.38 },
     { currency: 'ARS', total: 1250000.00, change: 50000.00, changePercent: 4.17 },
   ];
+
+  // Calcular total consolidado en moneda local
+  const consolidatedTotal = portfolioSummary.reduce((acc, summary) => {
+    const valueInUSD = summary.total * exchangeRates[summary.currency as keyof typeof exchangeRates];
+    const valueInLocal = valueInUSD / exchangeRates[localCurrency as keyof typeof exchangeRates];
+    return acc + valueInLocal;
+  }, 0);
+
+  const consolidatedChange = portfolioSummary.reduce((acc, summary) => {
+    const changeInUSD = summary.change * exchangeRates[summary.currency as keyof typeof exchangeRates];
+    const changeInLocal = changeInUSD / exchangeRates[localCurrency as keyof typeof exchangeRates];
+    return acc + changeInLocal;
+  }, 0);
+
+  const consolidatedChangePercent = (consolidatedChange / (consolidatedTotal - consolidatedChange)) * 100;
+
+  const availableCurrencies = ['USD', 'EUR', 'ARS'];
 
   const savingsAccounts = [
     { id: 1, name: 'Cuenta Principal USD', bank: 'Banco Nacional', balance: 25000, currency: 'USD', rate: 0.5 },
@@ -17,9 +43,9 @@ export default function AccountsPage() {
   ];
 
   const investments = [
-    { id: 5, name: 'ETF S&P 500', type: 'ETF', balance: 15250.50, currency: 'USD', return: 8.5 },
-    { id: 6, name: 'Bonos Gobierno', type: 'Bonos', balance: 5000, currency: 'USD', return: 4.2 },
-    { id: 7, name: 'Acciones Tech', type: 'Acciones', balance: 12100, currency: 'EUR', return: -2.3 },
+    { id: 5, name: 'ETF S&P 500', type: 'ETF', balance: 15250.50, currency: 'USD', broker: 'Interactive Brokers' },
+    { id: 6, name: 'Bonos Gobierno', type: 'Bonos', balance: 5000, currency: 'USD', broker: 'Bullmarket Brokers' },
+    { id: 7, name: 'Acciones Tech', type: 'Acciones', balance: 12100, currency: 'EUR', broker: 'DeGiro' },
   ];
 
   const projectedYield = {
@@ -33,6 +59,55 @@ export default function AccountsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Mis Cuentas</h1>
         <p className="text-gray-600">Resumen completo de tu patrimonio</p>
+      </div>
+
+      {/* Total Consolidado en Moneda Local */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-8 mb-8 text-white">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h2 className="text-lg font-medium opacity-90 mb-1">Patrimonio Total Consolidado</h2>
+            <p className="text-sm opacity-75">Todas las monedas convertidas a {localCurrency}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm opacity-90">Moneda:</span>
+            <select 
+              defaultValue={localCurrency}
+              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-3 py-2 text-white font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
+              value={localCurrency}
+            >
+              {availableCurrencies.map((curr) => (
+                <option key={curr} value={curr} className="text-gray-900">
+                  {curr}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-5xl font-bold mb-3">
+              {new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: localCurrency,
+                minimumFractionDigits: 2
+              }).format(consolidatedTotal)}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`text-lg font-semibold ${consolidatedChange >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                {consolidatedChange >= 0 ? '+' : ''}
+                {new Intl.NumberFormat('es-AR', {
+                  style: 'currency',
+                  currency: localCurrency,
+                  minimumFractionDigits: 2
+                }).format(consolidatedChange)}
+              </span>
+              <span className={`text-sm font-medium px-3 py-1 rounded-full ${consolidatedChangePercent >= 0 ? 'bg-green-500/30' : 'bg-red-500/30'}`}>
+                {consolidatedChangePercent >= 0 ? '+' : ''}{consolidatedChangePercent.toFixed(2)}%
+              </span>
+              <span className="text-sm opacity-75">último período</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Resumen Patrimonio Total Multi-Moneda */}
@@ -217,8 +292,8 @@ export default function AccountsPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Broker</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Rendimiento</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
@@ -233,6 +308,9 @@ export default function AccountsPage() {
                         {investment.type}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">{investment.broker}</div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm font-semibold text-gray-900">
                         {new Intl.NumberFormat('es-AR', {
@@ -240,11 +318,6 @@ export default function AccountsPage() {
                           currency: investment.currency
                         }).format(investment.balance)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className={`text-sm font-medium ${investment.return >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {investment.return >= 0 ? '+' : ''}{investment.return}%
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <button className="text-blue-600 hover:text-blue-800 text-sm font-medium mr-3">Ver</button>
