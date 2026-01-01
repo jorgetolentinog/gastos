@@ -29,5 +29,5 @@ export const transactionTable = pgTable("transaction", {
   accountId: uuid("account_id").notNull().references(() => accountTable.accountId),
   amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
   description: text("description"),
-  date: timestamp("date", { withTimezone: true }).notNull(),
+  date: timestamp("date", {withTimezone: true}).notNull(),
 });

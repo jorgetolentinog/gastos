@@ -16,7 +16,7 @@ async function createTransaction(formData: FormData) {
         accountId,
         amountMinor: BigInt(Math.round(amount * 100)),
         description,
-        date: BigInt(new Date(date).getTime()),
+        date: new Date(date),
     });
 
     revalidatePath('/transactions');

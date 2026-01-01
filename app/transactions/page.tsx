@@ -31,7 +31,7 @@ export default async function TransactionsPage() {
                     <tbody>
                         {transactions.map((transaction) => (
                             <tr key={transaction.transaction.transactionId} className="border-t border-gray-200 hover:bg-gray-50">
-                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.date}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.date.toISOString()}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.description}</td>
                                 <td className="px-4 py-3 text-sm text-right text-gray-900">
                                     ${(Number(transaction.transaction.amountMinor) / 100).toFixed(2)}
