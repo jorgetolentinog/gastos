@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { accountTable, db, transactionTable } from '@/database';
+import { accountTable, transactionTable } from '@/database/schema';
+import { db } from '@/database/client';
 
 async function createTransaction(formData: FormData) {
     'use server';

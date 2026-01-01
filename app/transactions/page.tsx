@@ -1,4 +1,5 @@
-import { accountTable, db, transactionTable } from "@/database";
+import { db } from "@/database/client";
+import { accountTable, transactionTable } from "@/database/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 

@@ -1,4 +1,5 @@
-import { accountTable, currencyTable, db } from "@/database"
+import { db } from "@/database/client";
+import { accountTable, currencyTable } from "@/database/schema";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

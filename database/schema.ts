@@ -1,4 +1,4 @@
-import { bigint, bigserial, char, integer, pgTable, serial, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { bigint, pgTable, smallint, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const userTable = pgTable("user", {
   id: uuid("id").primaryKey(),
@@ -7,9 +7,10 @@ export const userTable = pgTable("user", {
 
 export const currencyTable = pgTable("currency", {
   id: uuid("id").primaryKey(),
-  code: char("code", { length: 3 }).notNull().unique(),
+  code: varchar("code", { length: 3 }).notNull().unique(),
   name: text("name").notNull(),
-  flag: varchar("flag", { length: 10 }),
+  minorUnits: smallint("minor_units").notNull(),
+  flag: text("flag").notNull(),
 });
 
 export const accountTable = pgTable("account", {
@@ -23,11 +24,10 @@ export const accountTable = pgTable("account", {
   // aprBps: integer("apr_bps").notNull(),
 });
 
-// transactions
 export const transactionTable = pgTable("transaction", {
   transactionId: uuid("transaction_id").primaryKey(),
   accountId: uuid("account_id").notNull().references(() => accountTable.accountId),
   amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
   description: text("description"),
-  date: bigint("date", { mode: "bigint" }).notNull(),
+  date: timestamp("date", { withTimezone: true }).notNull(),
 });

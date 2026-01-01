@@ -19,12 +19,14 @@ async function main() {
         id: "00000000-0000-0000-0000-000000000001",
         code: "PEN",
         name: "Peruvian Sol",
+        minorUnits: 2,
         flag: "🇵🇪",
       },
       {
         id: "00000000-0000-0000-0000-000000000002",
         code: "USD",
         name: "US Dollar",
+        minorUnits: 2,
         flag: "🇺🇸",
       },
     ])
