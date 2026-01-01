@@ -1,29 +1,54 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { accountTable, db, transactionTable } from '@/database';
 
 async function createTransaction(formData: FormData) {
     'use server';
     
-    const amount = formData.get('amount');
-    const description = formData.get('description');
-    const category = formData.get('category');
-    const date = formData.get('date');
-    const type = formData.get('type');
-    const cuenta = formData.get('cuenta');
+    const accountId = formData.get('account') as string;
+    const date = formData.get('date') as string;
+    const description = formData.get('description') as string;
+    const amount = parseFloat(formData.get('amount') as string) || 0;
 
-    // Aquí va tu lógica para guardar en base de datos
-    // Por ejemplo: await db.transaction.create({ amount, description, category, date, type })
-    
+    await db.insert(transactionTable).values({
+        transactionId: crypto.randomUUID(),
+        accountId,
+        amountMinor: BigInt(Math.round(amount * 100)),
+        description,
+        date: BigInt(new Date(date).getTime()),
+    });
+
     revalidatePath('/transactions');
     redirect('/transactions');
 }
 
-export default function NewTransactionPage() {
+export default async function NewTransactionPage() {
+    const accounts = await db.select().from(accountTable);
+
     return (
         <div className="max-w-2xl mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6">Nueva Transacción</h1>
             
             <form action={createTransaction} className="space-y-4">
+                <div>
+                    <label htmlFor="account" className="block text-sm font-medium mb-2">
+                        Cuenta
+                    </label>
+                    <select
+                        id="account"
+                        name="account"
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                        <option value="">Seleccionar cuenta</option>
+                        {accounts.map((account) => (
+                            <option key={account.accountId} value={account.accountId}>
+                                {account.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 <div>
                     <label htmlFor="date" className="block text-sm font-medium mb-2">
                         Fecha
@@ -63,97 +88,6 @@ export default function NewTransactionPage() {
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium mb-3">
-                        Categoría
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {[
-                            { value: 'comida', label: 'Comida', icon: '🍔' },
-                            { value: 'transporte', label: 'Transporte', icon: '🚗' },
-                            { value: 'entretenimiento', label: 'Entretenimiento', icon: '🎮' },
-                            { value: 'servicios', label: 'Servicios', icon: '💼' },
-                            { value: 'otros', label: 'Otros', icon: '📦' },
-                        ].map((category) => (
-                            <label
-                                key={category.value}
-                                className="relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:shadow-md"
-                            >
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    value={category.value}
-                                    required
-                                    className="sr-only peer"
-                                />
-                                <span className="text-3xl mb-2">{category.icon}</span>
-                                <span className="text-sm font-medium text-gray-700 peer-checked:text-blue-600">
-                                    {category.label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium mb-3">
-                        Tipo
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { value: 'ingreso', label: 'Ingreso', icon: '💰' },
-                            { value: 'gasto', label: 'Gasto', icon: '💸' },
-                        ].map((type) => (
-                            <label
-                                key={type.value}
-                                className="relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:shadow-md"
-                            >
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value={type.value}
-                                    required
-                                    className="sr-only peer"
-                                />
-                                <span className="text-3xl mb-2">{type.icon}</span>
-                                <span className="text-sm font-medium text-gray-700 peer-checked:text-blue-600">
-                                    {type.label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium mb-3">
-                        Cuenta
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                        {[
-                            { value: 'efectivo', label: 'Efectivo', icon: '💵' },
-                            { value: 'banco', label: 'Banco', icon: '🏦' },
-                            { value: 'tarjeta', label: 'Tarjeta de Crédito', icon: '💳' },
-                        ].map((cuenta) => (
-                            <label
-                                key={cuenta.value}
-                                className="relative flex flex-col items-center justify-center p-4 rounded-lg border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:shadow-md"
-                            >
-                                <input
-                                    type="radio"
-                                    name="cuenta"
-                                    value={cuenta.value}
-                                    required
-                                    className="sr-only peer"
-                                />
-                                <span className="text-3xl mb-2">{cuenta.icon}</span>
-                                <span className="text-sm font-medium text-gray-700 peer-checked:text-blue-600">
-                                    {cuenta.label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
                 </div>
 
                 <button

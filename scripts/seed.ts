@@ -17,15 +17,15 @@ async function main() {
     .values([
       {
         id: "00000000-0000-0000-0000-000000000001",
-        code: "USD",
-        name: "US Dollar",
-        flag: "🇺🇸",
-      },
-      {
-        id: "00000000-0000-0000-0000-000000000002",
         code: "PEN",
         name: "Peruvian Sol",
         flag: "🇵🇪",
+      },
+      {
+        id: "00000000-0000-0000-0000-000000000002",
+        code: "USD",
+        name: "US Dollar",
+        flag: "🇺🇸",
       },
     ])
     .onConflictDoUpdate({

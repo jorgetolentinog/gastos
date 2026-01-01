@@ -1,27 +1,9 @@
+import { accountTable, db, transactionTable } from "@/database";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 
-interface Transaction {
-    id: string;
-    date: string;
-    description: string;
-    amount: number;
-    category: string;
-    type: string;
-    account: string;
-}
-
-export default function TransactionsPage() {
-    const transactions: Transaction[] = [
-        {
-            id: '1',
-            date: '2024-01-15',
-            description: 'Compra de Supermercado',
-            amount: 125.50,
-            category: 'Comida',
-            type: 'gasto',
-            account: 'Tarjeta de Crédito',
-        },
-    ];
+export default async function TransactionsPage() {
+    const transactions = await db.select().from(transactionTable).innerJoin(accountTable, eq(transactionTable.accountId, accountTable.accountId));
 
     return (
         <div className="container mx-auto p-6">
@@ -42,28 +24,18 @@ export default function TransactionsPage() {
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
                             <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Monto</th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Categoría</th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tipo</th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Cuenta</th>
                         </tr>
                     </thead>
                     <tbody>
                         {transactions.map((transaction) => (
-                            <tr key={transaction.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.date}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.description}</td>
+                            <tr key={transaction.transaction.transactionId} className="border-t border-gray-200 hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.date}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.description}</td>
                                 <td className="px-4 py-3 text-sm text-right text-gray-900">
-                                    ${transaction.amount.toFixed(2)}
+                                    ${(Number(transaction.transaction.amountMinor) / 100).toFixed(2)}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-700">{transaction.category}</td>
-                                <td className="px-4 py-3 text-sm text-gray-700">
-                                    <span className={`px-2 py-1 rounded-full text-xs ${
-                                        transaction.type === 'gasto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                                    }`}>
-                                        {transaction.type}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-700">{transaction.account}</td>
+                                <td className="px-4 py-3 text-sm text-gray-700">{transaction.account.name}</td>
                             </tr>
                         ))}
                     </tbody>
