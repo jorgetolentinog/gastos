@@ -24,9 +24,15 @@ export const accountTable = pgTable("account", {
   // aprBps: integer("apr_bps").notNull(),
 });
 
+export const categoryTable = pgTable("category", {
+  id: uuid("id").primaryKey(),
+  name: text("name").notNull(),
+});
+
 export const transactionTable = pgTable("transaction", {
   transactionId: uuid("transaction_id").primaryKey(),
   accountId: uuid("account_id").notNull().references(() => accountTable.accountId),
+  categoryId: uuid("category_id").notNull().references(() => categoryTable.id),
   amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
   description: text("description"),
   date: timestamp("date", {withTimezone: true}).notNull(),

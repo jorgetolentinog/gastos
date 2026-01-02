@@ -1,8 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import dotenv from "dotenv";
-import { userTable, currencyTable } from "../database/schema";
-import { sql } from "drizzle-orm";
+import { userTable, currencyTable, categoryTable } from "../database/schema";
 
 dotenv.config();
 
@@ -29,27 +28,21 @@ async function main() {
         minorUnits: 2,
         flag: "🇺🇸",
       },
-    ])
-    .onConflictDoUpdate({
-      target: currencyTable.code,
-      set: {
-        name: sql`excluded.name`,
-        flag: sql`excluded.flag`,
-      },
-    });
+    ]);
 
   await db
     .insert(userTable)
     .values({
       id: "00000000-0000-0000-0000-000000000001",
       email: "test@example.com",
-    })
-    .onConflictDoUpdate({
-      target: userTable.email,
-      set: {
-        email: sql`excluded.email`,
-      },
     });
+
+  await db.insert(categoryTable).values([
+    { id: "10000000-0000-0000-0000-000000000001", name: "Food" },
+    { id: "10000000-0000-0000-0000-000000000002", name: "Transport" },
+    { id: "10000000-0000-0000-0000-000000000003", name: "Salary" },
+    { id: "10000000-0000-0000-0000-000000000004", name: "Entertainment" },
+  ]);
 
   console.log("✅ Seeding completed!");
   await client.end();
