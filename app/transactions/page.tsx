@@ -22,21 +22,21 @@ export default async function TransactionsPage() {
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
                     <thead className="bg-gray-100">
                         <tr>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Cuenta</th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
                             <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Monto</th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Cuenta</th>
                         </tr>
                     </thead>
                     <tbody>
                         {transactions.map((transaction) => (
                             <tr key={transaction.transaction.transactionId} className="border-t border-gray-200 hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm text-gray-700">{transaction.account.name}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.date.toISOString()}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">{transaction.transaction.description}</td>
                                 <td className="px-4 py-3 text-sm text-right text-gray-900">
                                     ${(Number(transaction.transaction.amountMinor) / 100).toFixed(2)}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-700">{transaction.account.name}</td>
                             </tr>
                         ))}
                     </tbody>
