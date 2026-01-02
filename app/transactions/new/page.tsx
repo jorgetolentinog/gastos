@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { accountTable, transactionTable } from '@/database/schema';
+import { accountTable, categoryTable, transactionTable } from '@/database/schema';
 import { db } from '@/database/client';
 
 async function createTransaction(formData: FormData) {
@@ -10,10 +10,12 @@ async function createTransaction(formData: FormData) {
     const date = formData.get('date') as string;
     const description = formData.get('description') as string;
     const amount = parseFloat(formData.get('amount') as string) || 0;
+    const categoryId = formData.get('category') as string;
 
     await db.insert(transactionTable).values({
         transactionId: crypto.randomUUID(),
         accountId,
+        categoryId: categoryId,
         amountMinor: BigInt(Math.round(amount * 100)),
         description,
         date: new Date(date),
@@ -25,12 +27,27 @@ async function createTransaction(formData: FormData) {
 
 export default async function NewTransactionPage() {
     const accounts = await db.select().from(accountTable);
+    const categories = await db.select().from(categoryTable);
 
     return (
         <div className="max-w-2xl mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6">Nueva Transacción</h1>
             
             <form action={createTransaction} className="space-y-4">
+                <div>
+                    <label htmlFor="date" className="block text-sm font-medium mb-2">
+                        Fecha
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                        defaultValue={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
                 <div>
                     <label htmlFor="account" className="block text-sm font-medium mb-2">
                         Cuenta
@@ -51,17 +68,22 @@ export default async function NewTransactionPage() {
                 </div>
 
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium mb-2">
-                        Fecha
+                    <label htmlFor="category" className="block text-sm font-medium mb-2">
+                        Categoría
                     </label>
-                    <input
-                        type="date"
-                        id="date"
-                        name="date"
+                    <select
+                        id="category"
+                        name="category"
                         required
-                        defaultValue={new Date().toISOString().split('T')[0]}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
+                    >
+                        <option value="">Seleccionar categoría</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div>

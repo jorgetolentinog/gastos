@@ -1,19 +1,23 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import dotenv from "dotenv";
-import { userTable, currencyTable, categoryTable } from "../database/schema";
+import { userTable, currencyTable, categoryTable, accountTable } from "../database/schema";
 
 dotenv.config();
 
 async function main() {
-  const client = postgres(process.env.DATABASE_URL as string, { max: 1 });
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL no está definida");
+  }
+
+  const client = postgres(process.env.DATABASE_URL, { max: 1 });
   const db = drizzle(client);
 
-  console.log("🌱 Seeding database...");
+  try {
+    console.log("🌱 Insertando datos iniciales...");
 
-  await db
-    .insert(currencyTable)
-    .values([
+    console.log("  💱 Creando monedas...");
+    await db.insert(currencyTable).values([
       {
         id: "00000000-0000-0000-0000-000000000001",
         code: "PEN",
@@ -30,25 +34,38 @@ async function main() {
       },
     ]);
 
-  await db
-    .insert(userTable)
-    .values({
+    console.log("  👤 Creando usuario de prueba...");
+    await db.insert(userTable).values({
       id: "00000000-0000-0000-0000-000000000001",
       email: "test@example.com",
     });
 
-  await db.insert(categoryTable).values([
-    { id: "10000000-0000-0000-0000-000000000001", name: "Food" },
-    { id: "10000000-0000-0000-0000-000000000002", name: "Transport" },
-    { id: "10000000-0000-0000-0000-000000000003", name: "Salary" },
-    { id: "10000000-0000-0000-0000-000000000004", name: "Entertainment" },
-  ]);
+    console.log("  📁 Creando categorías...");
+    await db.insert(categoryTable).values([
+      { id: "10000000-0000-0000-0000-000000000001", name: "Food" },
+      { id: "10000000-0000-0000-0000-000000000002", name: "Transport" },
+      { id: "10000000-0000-0000-0000-000000000003", name: "Salary" },
+      { id: "10000000-0000-0000-0000-000000000004", name: "Entertainment" },
+    ]);
 
-  console.log("✅ Seeding completed!");
-  await client.end();
+    console.log("👉 Creando cuentas...")
+    await db.insert(accountTable).values([
+      {
+        accountId: "20000000-0000-0000-0000-000000000001",
+        userId: "00000000-0000-0000-0000-000000000001",
+        name: "Cash",
+        currency: "00000000-0000-0000-0000-000000000001",
+        initialBalanceMinor: BigInt(500000), // 5000.00 PEN
+      }
+    ]);
+
+    console.log("✅ Datos iniciales insertados correctamente");
+  } finally {
+    await client.end();
+  }
 }
 
 main().catch((error) => {
-  console.error("❌ Seeding failed:", error);
+  console.error("❌ Seed falló:", error);
   process.exit(1);
 });
