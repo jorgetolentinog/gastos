@@ -1,4 +1,12 @@
-import { bigint, pgTable, smallint, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const userTable = pgTable("user", {
   id: uuid("id").primaryKey(),
@@ -10,16 +18,22 @@ export const currencyTable = pgTable("currency", {
   code: varchar("code", { length: 3 }).notNull().unique(),
   name: text("name").notNull(),
   minorUnits: smallint("minor_units").notNull(),
-  flag: text("flag").notNull(),
+  emojiFlag: text("emoji_flag").notNull(),
 });
 
 export const accountTable = pgTable("account", {
-  accountId: uuid("account_id").primaryKey(),
-  userId: uuid("user_id").notNull().references(() => userTable.id),
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => userTable.id),
   // provider: text("provider"),
   name: text("name").notNull(),
-  currency: uuid("currency").notNull().references(() => currencyTable.id),
-  initialBalanceMinor: bigint("initial_balance_minor", { mode: "bigint" }).notNull(),
+  currencyId: uuid("currency_id")
+    .notNull()
+    .references(() => currencyTable.id),
+  initialBalanceMinor: bigint("initial_balance_minor", {
+    mode: "bigint",
+  }).notNull(),
   // balanceMinor: bigint("balance_minor", { mode: "bigint" }).notNull(),
   // aprBps: integer("apr_bps").notNull(),
 });
@@ -27,13 +41,18 @@ export const accountTable = pgTable("account", {
 export const categoryTable = pgTable("category", {
   id: uuid("id").primaryKey(),
   name: text("name").notNull(),
+  emojiIcon: text("emoji_icon").notNull(),
 });
 
 export const transactionTable = pgTable("transaction", {
-  transactionId: uuid("transaction_id").primaryKey(),
-  accountId: uuid("account_id").notNull().references(() => accountTable.accountId),
-  categoryId: uuid("category_id").notNull().references(() => categoryTable.id),
+  id: uuid("id").primaryKey(),
+  accountId: uuid("account_id")
+    .notNull()
+    .references(() => accountTable.id),
+  categoryId: uuid("category_id")
+    .notNull()
+    .references(() => categoryTable.id),
   amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
   description: text("description"),
-  date: timestamp("date", {withTimezone: true}).notNull(),
+  date: timestamp("date", { withTimezone: true }).notNull(),
 });

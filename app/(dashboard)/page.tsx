@@ -116,7 +116,7 @@ export default async function Home() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {lastTransactions.map((transaction) => (
-                <tr key={transaction.transactionId}>
+                <tr key={transaction.id}>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {transaction.description}
                   </td>

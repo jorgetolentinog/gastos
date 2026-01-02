@@ -6,10 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck",
-    "db:dev": "tsx ./scripts/reset.ts && drizzle-kit push && tsx ./scripts/seed.ts",
+    "check": "eslint && tsc --noEmit",
+    "db:restart": "tsx ./scripts/reset.ts && drizzle-kit push && tsx ./scripts/seed.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

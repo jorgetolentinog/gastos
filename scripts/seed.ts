@@ -1,7 +1,12 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import dotenv from "dotenv";
-import { userTable, currencyTable, categoryTable, accountTable } from "../database/schema";
+import {
+  userTable,
+  currencyTable,
+  categoryTable,
+  accountTable,
+} from "../database/schema";
 
 dotenv.config();
 
@@ -23,14 +28,14 @@ async function main() {
         code: "PEN",
         name: "Peruvian Sol",
         minorUnits: 2,
-        flag: "🇵🇪",
+        emojiFlag: "🇵🇪",
       },
       {
         id: "00000000-0000-0000-0000-000000000002",
         code: "USD",
         name: "US Dollar",
         minorUnits: 2,
-        flag: "🇺🇸",
+        emojiFlag: "🇺🇸",
       },
     ]);
 
@@ -42,21 +47,37 @@ async function main() {
 
     console.log("  📁 Creando categorías...");
     await db.insert(categoryTable).values([
-      { id: "10000000-0000-0000-0000-000000000001", name: "Food" },
-      { id: "10000000-0000-0000-0000-000000000002", name: "Transport" },
-      { id: "10000000-0000-0000-0000-000000000003", name: "Salary" },
-      { id: "10000000-0000-0000-0000-000000000004", name: "Entertainment" },
+      {
+        id: "10000000-0000-0000-0000-000000000001",
+        name: "Food",
+        emojiIcon: "🍔",
+      },
+      {
+        id: "10000000-0000-0000-0000-000000000002",
+        name: "Transport",
+        emojiIcon: "🚌",
+      },
+      {
+        id: "10000000-0000-0000-0000-000000000003",
+        name: "Salary",
+        emojiIcon: "💼",
+      },
+      {
+        id: "10000000-0000-0000-0000-000000000004",
+        name: "Entertainment",
+        emojiIcon: "🎮",
+      },
     ]);
 
-    console.log("👉 Creando cuentas...")
+    console.log("👉 Creando cuentas...");
     await db.insert(accountTable).values([
       {
-        accountId: "20000000-0000-0000-0000-000000000001",
+        id: "20000000-0000-0000-0000-000000000001",
         userId: "00000000-0000-0000-0000-000000000001",
         name: "Cash",
-        currency: "00000000-0000-0000-0000-000000000001",
+        currencyId: "00000000-0000-0000-0000-000000000001",
         initialBalanceMinor: BigInt(500000), // 5000.00 PEN
-      }
+      },
     ]);
 
     console.log("✅ Datos iniciales insertados correctamente");

@@ -1,12 +1,16 @@
 import { db } from "@/database/client";
-import { accountTable, currencyTable, transactionTable } from "@/database/schema";
+import {
+  accountTable,
+  currencyTable,
+  transactionTable,
+} from "@/database/schema";
 import { eq, sql } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function AccountsPage() {
   const accounts = await db
     .select({
-      accountId: accountTable.accountId,
+      accountId: accountTable.id,
       name: accountTable.name,
       currencyCode: currencyTable.code,
       balanceMinor: sql<bigint>`(
@@ -14,20 +18,23 @@ export default async function AccountsPage() {
         COALESCE(
           (SELECT SUM(${transactionTable.amountMinor}) 
            FROM ${transactionTable} 
-           WHERE ${transactionTable.accountId} = ${accountTable.accountId}),
+           WHERE ${transactionTable.accountId} = ${accountTable.id}),
           0
         )
-      )::bigint`.as('balance_minor'),
+      )::bigint`.as("balance_minor"),
     })
     .from(accountTable)
-    .innerJoin(currencyTable, eq(accountTable.currency, currencyTable.id))
+    .innerJoin(currencyTable, eq(accountTable.currencyId, currencyTable.id));
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-semibold">Cuentas</h1>
-          <Link href="/accounts/new" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          <Link
+            href="/accounts/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
             + Nueva Cuenta
           </Link>
         </div>
@@ -36,19 +43,26 @@ export default async function AccountsPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuenta</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cuenta
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Saldo
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {accounts.map((account) => (
                   <tr key={account.accountId} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{account.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {account.name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm font-semibold text-gray-900">
-                        {account.currencyCode} {(Number(account.balanceMinor) / 100).toFixed(2)}
+                        {account.currencyCode}{" "}
+                        {(Number(account.balanceMinor) / 100).toFixed(2)}
                       </div>
                     </td>
                   </tr>
