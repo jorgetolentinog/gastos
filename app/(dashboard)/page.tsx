@@ -1,8 +1,56 @@
 import { db } from "@/database/client";
 import { categoryTable, transactionTable } from "@/database/schema";
-import { desc, eq, getTableColumns } from "drizzle-orm";
+import {
+  desc,
+  eq,
+  getTableColumns,
+  sum,
+  sql,
+  gte,
+  lte,
+  and,
+  gt,
+  lt,
+} from "drizzle-orm";
 
 export default async function Home() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59
+  );
+
+  const [incomes] = await db
+    .select({
+      total: sql<bigint>`COALESCE(SUM(${transactionTable.amountMinor}), 0)::bigint`,
+    })
+    .from(transactionTable)
+    .where(
+      and(
+        gte(transactionTable.date, startOfMonth),
+        lte(transactionTable.date, endOfMonth),
+        gt(transactionTable.amountMinor, BigInt(0))
+      )
+    );
+
+  const [expenses] = await db
+    .select({
+      total: sql<bigint>`COALESCE(SUM(${transactionTable.amountMinor}), 0)::bigint`,
+    })
+    .from(transactionTable)
+    .where(
+      and(
+        gte(transactionTable.date, startOfMonth),
+        lte(transactionTable.date, endOfMonth),
+        lt(transactionTable.amountMinor, BigInt(0))
+      )
+    );
+
   const lastTransactions = await db
     .select({
       ...getTableColumns(transactionTable),
@@ -21,7 +69,9 @@ export default async function Home() {
             <h3 className="text-lg font-bold text-gray-900">Ingresos</h3>
             <div className="text-2xl">💰</div>
           </div>
-          <p className="text-3xl font-bold text-green-600 mb-1">US$ 3.500,00</p>
+          <p className="text-3xl font-bold text-green-600 mb-1">
+            US$ {(Number(incomes.total) / 100).toFixed(2)}
+          </p>
           <p className="text-sm text-gray-600">Este mes</p>
         </div>
 
@@ -30,7 +80,9 @@ export default async function Home() {
             <h3 className="text-lg font-bold text-gray-900">Gastos</h3>
             <div className="text-2xl">💸</div>
           </div>
-          <p className="text-3xl font-bold text-red-600 mb-1">US$ 1.850,00</p>
+          <p className="text-3xl font-bold text-red-600 mb-1">
+            US$ {(Number(expenses.total) / 100).toFixed(2)}
+          </p>
           <p className="text-sm text-gray-600">Este mes</p>
         </div>
       </div>
@@ -85,74 +137,10 @@ export default async function Home() {
                     {(Number(transaction.amountMinor) / 100).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(transaction.date).toLocaleDateString(undefined, {
-                      day: "2-digit",
-                      month: "short",
-                      ...(new Date(transaction.date).getFullYear() !==
-                      new Date().getFullYear()
-                        ? { year: "numeric" }
-                        : {}),
-                    })}
+                    {transaction.date.toISOString()}
                   </td>
                 </tr>
               ))}
-
-              <tr>
-                <td className="px-6 py-4 text-sm text-gray-900">Almuerzo</td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
-                    Comida
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-red-600">Gasto</td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  -US$ 25,00
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">Hoy 12:45</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  Salario Mensual
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
-                    Ingreso
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-green-600">Ingreso</td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  +US$ 3.500,00
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">27 Dic</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-sm text-gray-900">Uber</td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-medium">
-                    Transporte
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-red-600">Gasto</td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  -US$ 15,50
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">26 Dic</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  Película Netflix
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="inline-block bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium">
-                    Entretenimiento
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-red-600">Gasto</td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                  -US$ 15,99
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">25 Dic</td>
-              </tr>
             </tbody>
           </table>
         </div>
